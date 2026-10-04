@@ -1,0 +1,24 @@
+package com.rtms.backend.repository;
+
+import com.rtms.backend.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+import java.util.List;
+import org.springframework.data.jpa.repository.Query;
+
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByEmail(String email);
+
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT u FROM User u WHERE u.id = :id")
+    Optional<User> findByIdForUpdate(@org.springframework.data.repository.query.Param("id") Long id);
+
+    @Query("SELECT u FROM User u WHERE u.isActive = true AND u.role.name = 'VETERINARIAN' ORDER BY u.id")
+    List<User> findActiveVeterinarians();
+
+    @Query("SELECT u FROM User u WHERE u.isActive = true AND u.role.name = 'HEAD_TRAINER' ORDER BY u.id")
+    List<User> findActiveHeadTrainers();
+}
